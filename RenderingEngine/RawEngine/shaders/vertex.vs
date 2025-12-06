@@ -8,8 +8,8 @@ out vec2 uv;
 
 void main()
 {
-   fPos = aPos;
+   fPos = vec4(aNor, 1.0) * aPos;
    fNor = aNor;
    uv = aUv;
-   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);
+   gl_Position = vec4(aPos, 1.0);
 }

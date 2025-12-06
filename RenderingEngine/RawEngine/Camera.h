@@ -1,16 +1,20 @@
 #pragma once
 #include <glm/glm.hpp>
+#include <glad/glad.h>
 
-class Camera 
+class Camera
 {
- public:
+public:
     glm::vec3 cameraPos;
     glm::vec3 cameraTarget;
     glm::vec3 cameraForward;
     glm::vec3 up;
     glm::vec3 cameraRight;
     glm::vec3 cameraUp;
-    
+    float yaw;
+    float pitch;
+    float mouseSensitivity;
+
     Camera();
 
     void Variables();
@@ -21,16 +25,5 @@ class Camera
 
     void Up(float up);
 
-    void Rotate(glm::vec3 axis, float rotate);
-
-    /*void Transform()
-    {
-        cameraPos == cameraPos + cameraForward;
-        cameraTarget == cameraTarget + cameraForward;
-    }
-
-    void Rotate(glm::vec3 axis) {
-        up = glm::vec3(up);
-    }*/
-
+    void Rotate(float xoffset, float yoffset, bool pitchLimit = true);
 };

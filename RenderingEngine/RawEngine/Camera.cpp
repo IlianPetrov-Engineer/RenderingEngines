@@ -5,13 +5,17 @@ Camera::Camera()
 {
     cameraPos = glm::vec3(0.0f, 0.0f, 10.0f);
     cameraTarget = glm::vec3(0.0f, 0.0f, 0.0f);
-    up = glm::vec3(0.0f, -1.0f, 0.0f);
+    up = glm::vec3(0.0f, 1.0f, 0.0f);
+    
+    yaw = -90.0f;
+    pitch = 0.0f;
+    mouseSensitivity = 0.1f;
 }
 
 void Camera::Variables()
 {
-    cameraForward = glm::normalize(cameraTarget - cameraPos);
-    cameraRight = glm::normalize(glm::cross(cameraForward, up));
+    cameraForward = glm::normalize(cameraPos - cameraTarget);
+    cameraRight = glm::normalize(glm::cross(up, cameraForward));
     cameraUp = glm::normalize(glm::cross(cameraForward, cameraRight));
 }
 
@@ -36,46 +40,30 @@ void Camera::Up(float up)
     cameraTarget += cameraUp * up;
 }
 
-void Camera::Rotate(glm::vec3 axis,float rotate)
+void Camera::Rotate(float xoffset, float yoffset, bool pitchLimit)
 {
-    Variables();
-        
-    float radians = glm::radians(rotate);
-   /* glm::vec3 k = glm::normalize(axis);
+    xoffset *= mouseSensitivity;
+    yoffset *= mouseSensitivity;
 
-    glm::vec3 offset = cameraPos - cameraTarget;
+    yaw += xoffset;
+    pitch += yoffset;
 
-    glm::vec3 rotated =
-        offset * cos(radians) +
-        glm::cross(k, offset) * sin(radians) +
-        k * glm::dot(k, offset) * (1.0f - cos(radians));
+    if (pitchLimit)
+    {
+        if (pitch > 89.0f)
+            pitch = 89.0f;
+        if (pitch < -89.0f)
+            pitch = -89.0f;
+    }
 
-    cameraPos = cameraTarget + rotated;
-
-    cameraForward = glm::normalize(cameraTarget - cameraPos);
-
-    cameraRight = glm::normalize(glm::cross(cameraForward, glm::vec3(0, 1, 0)));*/
-
-    /*glm::mat4 rot = glm::rotate(glm::mat4(1.0f), radians, glm::normalize(axis));
-
-    cameraForward = glm::normalize(rot * glm::vec4(cameraForward, 0.0f));
+    glm::vec3 front;
+    front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+    front.y = sin(glm::radians(pitch));
+    front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+   
+    cameraForward = glm::normalize(front);
+    cameraRight = glm::normalize(glm::cross(up, cameraForward));
+    cameraUp = glm::normalize(glm::cross(cameraForward, cameraRight));
 
     cameraTarget = cameraPos + cameraForward;
-
-    cameraRight = glm::normalize(glm::cross(cameraForward, up)); */
-
-    glm::vec3 k = glm::normalize(axis);
-    glm::vec3 v = cameraForward;
-
-    // Rodrigues formula
-    glm::vec3 rotated =
-        v * cos(radians) +
-        glm::cross(k, v) * sin(radians) +
-        k * glm::dot(k, v) * (1.0f - cos(radians));
-
-    cameraForward = glm::normalize(rotated);
-    cameraTarget = cameraPos + cameraForward;
-
-    // Recalculate the basis
-    cameraRight = glm::normalize(glm::cross(cameraForward, up));
 }

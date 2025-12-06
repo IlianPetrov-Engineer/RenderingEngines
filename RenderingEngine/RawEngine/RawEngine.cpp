@@ -9,7 +9,6 @@
 #include "core/mesh.h"
 #include "core/assimpLoader.h"
 #include "core/texture.h"
-// mine:
 #include "Camera.h"
 //#include "Light.h"
 
@@ -72,6 +71,15 @@ GLuint generateShader(const std::string& shaderPath, GLuint shaderType) {
     }
     return shader;
 }
+
+float finishFrameTime = 0.0f;
+float deltaTime = 0.0f;
+
+bool activeMouse = true;
+float yaw = -90.0f;
+float pitch = 0.0f;
+float lastX = g_width / 2.0;
+float lastY = g_height / 2.0;
 
 int main() {
     glfwInit();
@@ -164,19 +172,13 @@ int main() {
     GLint mvpMatrixUniform = glGetUniformLocation(modelShaderProgram, "mvpMatrix");
     GLint textureModelUniform = glGetUniformLocation(textureShaderProgram, "mvpMatrix");
     GLint textureUniform = glGetUniformLocation(textureShaderProgram, "text");
+    GLint lightDirectionUniform = glGetUniformLocation(modelShaderProgram, "lightDirection");
 
-    double currentTime = glfwGetTime();
-    double finishFrameTime = 0.0;
-    float deltaTime = 0.0f;
     float rotationStrength = 100.0f;
 
- 
     float zoom = 0;
 
-    /*double oldMouseX = 0;
-    double deltaMouseX = 0;
-
-    double camHeading = 0;*/
+    float camSpeed = 2.5f;
 
     while (!glfwWindowShouldClose(window)) {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -186,62 +188,60 @@ int main() {
         ImGui::NewFrame();
         ImGui::Begin("Raw Engine v2 - BC4");
         ImGui::Text("Hello :)");
-       /* ImGui::SliderFloat("Camera offset: ", &camOffset,-2,2);*/
+        ImGui::SliderFloat("Camera speed: ", &camSpeed, 0, 200);
+        ImGui::SliderFloat("Camera rotation speed: ", &rotationStrength, -1000, 1000);
         ImGui::End();
-
-       /* double xpos, ypos;
-        glfwGetCursorPos(window, &xpos, &ypos);
-        deltaMouseX = xpos - oldMouseX;
-        oldMouseX += deltaMouseX;
-        printf("Mouse x %f\n", xpos);*/
-
 
         processInput(window);
         suzanne.rotate(glm::vec3(0.0f, 1.0f, 0.0f), glm::radians(rotationStrength) * static_cast<float>(deltaTime));
 
-        float speed = 0.01f;
+
+        float currentTime = glfwGetTime();
+        deltaTime = currentTime - finishFrameTime;
+        finishFrameTime = currentTime;
+
+        float speed = static_cast<float>(camSpeed * deltaTime);
+
         if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-        {
-            cam.Forward(speed);
-        }
+            cam.Forward(-speed);
         
         if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-        {
-            cam.Forward(-speed);
-        }
+            cam.Forward(speed);
         
         if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-        {
-            cam.Right(speed);
-        }
+            cam.Right(-speed);
 
         if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-        {
-            cam.Right(-speed);
-        }
+            cam.Right(speed);
 
         if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
-        {
             cam.Up(speed);
-        }
 
         if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
-        {
             cam.Up(-speed);
+
+        if (glfwGetKey(window, GLFW_KEY_V) == GLFW_PRESS)
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        if (glfwGetKey(window, GLFW_KEY_B) == GLFW_PRESS)
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+
+        double xpos, ypos;
+        glfwGetCursorPos(window, &xpos, &ypos);
+
+        if (activeMouse)
+        {
+            lastX = xpos;
+            lastY = ypos;
+            activeMouse = false;
         }
 
-        if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
-            cam.Rotate(glm::vec3(0, 1, 0), -speed);
-        if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
-            cam.Rotate(glm::vec3(0, 1, 0), speed);
-        if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
-            cam.Rotate(cam.cameraRight, speed);
-        if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
-            cam.Rotate(cam.cameraRight, -speed);
-        /*if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS)
-            cam.Rotate(cam.cameraForward, speed);
-        if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS)
-            cam.Rotate(cam.cameraForward, -speed);*/
+        float xoffset = xpos - lastX;
+        float yoffset = lastY - ypos;
+
+        lastX = xpos;
+        lastY = ypos;
+
+        cam.Rotate(xoffset, yoffset);
  
         if (glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS)
             zoom += 0.01f;
@@ -250,30 +250,9 @@ int main() {
        
         projection = glm::perspective(glm::radians(45.0f + zoom), static_cast<float>(g_width) / static_cast<float>(g_height), 0.1f, 100.0f);
 
-
-        //if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS)
-        //{
-        //    if (oldMouseX != deltaMouseX)
-        //    {
-        //        view = glm::translate(glm::rotate(glm::mat4(1), (float)oldMouseX * 0.001f, glm::vec3(0, 1, 0)), -cam.cameraPos);
-        //    }
-        //    //view = glm::translate(glm::rotate(glm::mat4(1), (float)oldMouseX * 0.001f, glm::vec3(0, 1, 0)), -cam.cameraPos);
-        //}
-   
-        
-        // view goes from world to camera. The camera model matrix would go from camera to world (inverse)
-        view = glm::lookAt(cam.cameraPos, cam.cameraTarget, cam.cameraUp);
-            //glm::translate(glm::rotate(glm::mat4(1), (float)camHeading, glm::vec3(0, 1, 0)), -cam.cameraPos);
-        // you can manipulate matrices like this:
-        //glm::mat4 M(1); // identity matrix
-        //glm::translate(M, glm::vec3(0, 1, 0)); // translate
-
+        view = glm::lookAt(cam.cameraPos, cam.cameraTarget, cam.up);
+           
         printf("Camera pos: (%f, %f, %f)\n", cam.cameraPos.x, cam.cameraPos.y, cam.cameraPos.z);
-
-        //auto cameraModel = glm::inverse(view); // glm::translate(glm::rotate(glm::mat4(1), (float)oldMouseX * 0.001f, glm::vec3(0, 1, 0)), -cam.cameraPos);
-        //glm::vec4 fwd = view * glm::vec4(0, 0, 1, 0);
-        //printf("Camera forward: (%f,%f,%f)\n", fwd.x, fwd.y, fwd.z); // See shader programming BC6 :-)
-        ////std::cout << cameraModel << std::endl;
 
         glUseProgram(textureShaderProgram);
         glUniformMatrix4fv(textureModelUniform, 1, GL_FALSE, glm::value_ptr(projection * view * quadModel.getModelMatrix()));
@@ -284,8 +263,15 @@ int main() {
         glBindVertexArray(0);
         glActiveTexture(GL_TEXTURE0);
 
+        /*float timeValue = glfwGetTime();
+        float greenValue = (cos(timeValue) / 2.0f) + 0.5f;
+
+        glClearColor(clearColor.r,
+            greenValue, clearColor.b, clearColor.a);*/
+
         glUseProgram(modelShaderProgram);
         glUniformMatrix4fv(mvpMatrixUniform, 1, GL_FALSE, glm::value_ptr(projection * view * suzanne.getModelMatrix()));
+        glUniform3f(lightDirectionUniform, 1, 0, 0);
         suzanne.render();
         glBindVertexArray(0);
 

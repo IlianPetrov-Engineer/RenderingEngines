@@ -81,6 +81,11 @@ float pitch = 0.0f;
 float lastX = g_width / 2.0;
 float lastY = g_height / 2.0;
 
+float rotationStrength = 100.0f;
+
+float zoom = 0;
+float camSpeed = 2.5f;
+
 int main() {
     glfwInit();
     glfwWindowHint(GLFW_SAMPLES, 4);
@@ -174,12 +179,6 @@ int main() {
     GLint textureUniform = glGetUniformLocation(textureShaderProgram, "text");
     GLint lightDirectionUniform = glGetUniformLocation(modelShaderProgram, "lightDirection");
 
-    float rotationStrength = 100.0f;
-
-    float zoom = 0;
-
-    float camSpeed = 2.5f;
-
     while (!glfwWindowShouldClose(window)) {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -189,12 +188,12 @@ int main() {
         ImGui::Begin("Raw Engine v2 - BC4");
         ImGui::Text("Hello :)");
         ImGui::SliderFloat("Camera speed: ", &camSpeed, 0, 200);
-        ImGui::SliderFloat("Camera rotation speed: ", &rotationStrength, -1000, 1000);
+        ImGui::SliderFloat("Model rotation speed: ", &rotationStrength, -1000, 1000);
+        ImGui::SliderFloat("Camera rotation speed: ", &cam.mouseSensitivity, 0, 1);
         ImGui::End();
 
         processInput(window);
         suzanne.rotate(glm::vec3(0.0f, 1.0f, 0.0f), glm::radians(rotationStrength) * static_cast<float>(deltaTime));
-
 
         float currentTime = glfwGetTime();
         deltaTime = currentTime - finishFrameTime;
@@ -220,28 +219,39 @@ int main() {
         if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
             cam.Up(-speed);
 
-        if (glfwGetKey(window, GLFW_KEY_V) == GLFW_PRESS)
+        
+        bool cursorLock = false;
+        if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS)
+        {
             glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-        if (glfwGetKey(window, GLFW_KEY_B) == GLFW_PRESS)
+            cursorLock = true;
+        }
+        if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) != GLFW_PRESS)
+        {
             glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+            cursorLock = false;
+        }
 
         double xpos, ypos;
         glfwGetCursorPos(window, &xpos, &ypos);
 
-        if (activeMouse)
+        if (cursorLock)
         {
+            if (activeMouse)
+            {
+                lastX = xpos;
+                lastY = ypos;
+                activeMouse = false;
+            }
+
+            float xoffset = xpos - lastX;
+            float yoffset = lastY - ypos;
+
             lastX = xpos;
             lastY = ypos;
-            activeMouse = false;
+
+            cam.Rotate(xoffset, yoffset);
         }
-
-        float xoffset = xpos - lastX;
-        float yoffset = lastY - ypos;
-
-        lastX = xpos;
-        lastY = ypos;
-
-        cam.Rotate(xoffset, yoffset);
  
         if (glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS)
             zoom += 0.01f;

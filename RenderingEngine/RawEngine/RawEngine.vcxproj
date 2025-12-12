@@ -145,6 +145,8 @@
     <ClInclude Include="Light.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Light.fs" />
+    <None Include="Light.vs" />
     <None Include="shaders\fragment.fs" />
     <None Include="shaders\modelVertex.vs" />
     <None Include="shaders\texture.fs" />

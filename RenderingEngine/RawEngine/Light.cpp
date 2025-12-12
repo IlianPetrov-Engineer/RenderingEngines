@@ -10,12 +10,12 @@
 //	col = glm::vec4(1, 1, 1, 1);
 //}
 
-void Light::Ambient()
-{
-	ambient = ambientIntensity * ambientColour * diffusedColour;
-}
-
-void Light::Test()
-{
-	lightDirection = glm::normalize(position - glm::vec3(0, 0, 0));
-}
+//void Light::Ambient()
+//{
+//	ambient = ambientIntensity * ambientColour * diffusedColour;
+//}
+//
+//void Light::Test()
+//{
+//	lightDirection = glm::normalize(position - glm::vec3(0, 0, 0));
+//}

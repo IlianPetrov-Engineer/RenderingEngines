@@ -28,6 +28,9 @@
     <Filter Include="Resource Files\Shaders">
       <UniqueIdentifier>{5d6dfbe4-335b-4150-8bfc-6305c628f346}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Resource Files\Shaders\Mine">
+      <UniqueIdentifier>{7178882d-334d-474a-bbc3-9c981a02f143}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="RawEngine.cpp">
@@ -87,6 +90,12 @@
     </None>
     <None Include="shaders\vertex.vs">
       <Filter>Resource Files\Shaders</Filter>
+    </None>
+    <None Include="Light.vs">
+      <Filter>Resource Files\Shaders\Mine</Filter>
+    </None>
+    <None Include="Light.fs">
+      <Filter>Resource Files\Shaders\Mine</Filter>
     </None>
   </ItemGroup>
 </Project>

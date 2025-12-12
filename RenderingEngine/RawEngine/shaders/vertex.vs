@@ -6,10 +6,18 @@ out vec3 fPos;
 out vec3 fNor;
 out vec2 uv;
 
+uniform mat4 model;
+uniform mat4 view;
+uniform mat4 projection;
+
 void main()
 {
-   fPos = vec4(aNor, 1.0) * aPos;
-   fNor = aNor;
-   uv = aUv;
-   gl_Position = vec4(aPos, 1.0);
+    fPos = vec3(model * vec4(aPos, 1.0));
+ 
+    mat3 normalMatrix = transpose(inverse(mat3(model)));
+    fNor = normalize(normalMatrix * aNor);
+
+    uv = aUv;
+
+    gl_Position = projection * view * model * vec4(aPos, 1.0);
 }

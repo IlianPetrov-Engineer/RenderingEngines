@@ -19,5 +19,5 @@ void main()
 	//FragColor += strength;
 
 	// debug, show normals:
-	FragColor = b;
+	//FragColor = vec4(fNor.x, fNor.y, fNor.z,1);
 }

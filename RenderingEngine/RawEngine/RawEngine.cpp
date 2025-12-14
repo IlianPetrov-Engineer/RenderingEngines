@@ -86,6 +86,13 @@ float rotationStrength = 100.0f;
 float zoom = 0;
 float camSpeed = 50.0f;
 
+glm::vec3 objectColor = glm::vec3(0.1, 0.1, 1);
+glm::vec3 lightPos = glm::vec3(2, 0, 0);
+glm::vec3 lightColor = glm::vec3(1, 0.1, 0.1);
+float ambientStrength = 0.5f;
+glm::vec3 ambientColour = glm::vec3(1, 1, 1);
+float specularStrength = 32.0f;
+
 //Light::PointLight lamp(glm::vec3(2.0f, 4.0f, 1.0f), glm::vec3(1.0f, 0.9f, 0.8f));
 
 //glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
@@ -203,25 +210,20 @@ int main() {
 	GLint lightColorUniformLocation = glGetUniformLocation(lightShaderProgram, "lightColor");
 	GLint lightPosUniformLocation = glGetUniformLocation(lightShaderProgram, "lightPos");
 	GLint viewPosUniformLocation = glGetUniformLocation(lightShaderProgram, "viewPos");
+	GLint ambientStrengthUniformLocation = glGetUniformLocation(lightShaderProgram, "ambientStrength");
+	GLint ambientColourUniformLocation = glGetUniformLocation(lightShaderProgram, "ambientColour");
+	GLint specularStrengthUniformLocation = glGetUniformLocation(lightShaderProgram, "specularStrength");
 
 	GLint lightDirectionUniform = glGetUniformLocation(modelShaderProgram, "lightDirection");
-
-	/* unsigned int lightVAO;
-	 glGenVertexArrays(1, &lightVAO);
-	 glBindVertexArray(lightVAO);
-	 glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-	 glEnableVertexAttribArray(0);*/
-
-
 
 	while (!glfwWindowShouldClose(window)) {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+#pragma region Controls
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
-		ImGui::Begin("Raw Engine v2 - BC4");
-		ImGui::Text("Hello :)");
+		ImGui::Begin("Controls");
 
 		ImGui::SliderFloat("Camera speed", &camSpeed, 0, 200);
 		ImGui::SameLine();
@@ -239,6 +241,26 @@ int main() {
 			cam.mouseSensitivity = 0.1f;
 
 		ImGui::End();
+#pragma endregion
+
+#pragma region LightControl
+
+		ImGui::Begin("LightControl");
+
+		ImGui::SliderFloat("Ambient light Strength", &ambientStrength, 0, 10);
+		ImGui::SameLine();
+		if (ImGui::Button("Reset ambient light"))
+			ambientStrength = 0.5f;
+
+		ImGui::SliderFloat("Specular light Strength", &specularStrength, 1, 1024);
+		ImGui::SameLine();
+		if (ImGui::Button("Reset Specular light"))
+			specularStrength = 32.0f;
+
+		ImGui::End();
+
+#pragma endregion
+
 
 		processInput(window);
 		suzanne.rotate(glm::vec3(0.0f, 1.0f, 0.0f), glm::radians(rotationStrength) * static_cast<float>(deltaTime));
@@ -331,9 +353,12 @@ int main() {
 		glUniformMatrix4fv(modelMatrixLightUniformLocation, 1, GL_FALSE, glm::value_ptr(suzanne.getModelMatrix()));
 		glUniformMatrix4fv(viewMatrixLightUniformLocation, 1, GL_FALSE, glm::value_ptr(view));
 		glUniformMatrix4fv(projectionMatrixLightUniformLocation, 1, GL_FALSE, glm::value_ptr(projection));
-		glUniform3f(objectColorUniformLocation, 0.1, 1, 0.1);
-		glUniform3f(lightColorUniformLocation, 1, 1, 1);
-		glUniform3f(lightPosUniformLocation, 2, 0, 1);
+		glUniform3f(objectColorUniformLocation, objectColor.x, objectColor.y, objectColor.z);
+		glUniform3f(lightColorUniformLocation, lightColor.x, lightColor.y, lightColor.z);
+		glUniform3f(lightPosUniformLocation, lightPos.x, lightPos.y, lightPos.z);
+		glUniform1f(ambientStrengthUniformLocation, ambientStrength);
+		glUniform3f(ambientColourUniformLocation, ambientColour.x, ambientColour.y, ambientColour.z);
+		glUniform1f(specularStrengthUniformLocation, specularStrength);
 		glUniform3f(viewPosUniformLocation, cam.cameraPos.x, cam.cameraPos.y, cam.cameraPos.z);
 		suzanne.render();
 

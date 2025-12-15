@@ -72,8 +72,14 @@ GLuint generateShader(const std::string& shaderPath, GLuint shaderType) {
 	return shader;
 }
 
+#pragma region Variables
+
 float finishFrameTime = 0.0f;
 float deltaTime = 0.0f;
+
+float rotationStrength = 100.0f;
+
+#pragma region Mouse input
 
 bool activeMouse = true;
 float yaw = -90.0f;
@@ -81,21 +87,25 @@ float pitch = 0.0f;
 float lastX = g_width / 2.0;
 float lastY = g_height / 2.0;
 
-float rotationStrength = 100.0f;
-
 float zoom = 0;
 float camSpeed = 50.0f;
 
-glm::vec3 objectColor = glm::vec3(0.1, 0.1, 1);
+#pragma endregion
+
+#pragma region Light
+
+glm::vec4 ambientColour = glm::vec4(1, 0.01, 0.01, 1);
+glm::vec4 objectColor = glm::vec4(1, 1, 0.01, 1);
+glm::vec4 lightColor = glm::vec4(1, 1, 1, 1);
+
 glm::vec3 lightPos = glm::vec3(2, 0, 0);
-glm::vec3 lightColor = glm::vec3(1, 0.1, 0.1);
+
 float ambientStrength = 0.5f;
-glm::vec3 ambientColour = glm::vec3(1, 1, 1);
 float specularStrength = 32.0f;
 
-//Light::PointLight lamp(glm::vec3(2.0f, 4.0f, 1.0f), glm::vec3(1.0f, 0.9f, 0.8f));
+#pragma endregion
 
-//glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
+#pragma endregion
 
 int main() {
 	glfwInit();
@@ -144,6 +154,8 @@ int main() {
 	const GLuint lightFragmentShader = generateShader("Light.fs", GL_FRAGMENT_SHADER);
 	const GLuint lightVertexShader = generateShader("Light.vs", GL_VERTEX_SHADER);
 
+#pragma region Progrems
+
 	int success;
 	char infoLog[512];
 	const unsigned int modelShaderProgram = glCreateProgram(); // shader used for the monkey uses modelVertex as vertex shader, and fragment.fs as fragment shader
@@ -182,6 +194,8 @@ int main() {
 	glDeleteShader(lightFragmentShader);
 	glDeleteShader(lightVertexShader);
 
+#pragma endregion
+
 	core::Mesh quad = core::Mesh::generateQuad();
 	core::Model quadModel({ quad });
 	quadModel.translate(glm::vec3(0, 0, -2.5));
@@ -200,67 +214,85 @@ int main() {
 	glm::mat4 view = glm::lookAt(cam.cameraPos, cam.cameraTarget, cam.cameraUp);
 	glm::mat4 projection = glm::perspective(glm::radians(45.0f), static_cast<float>(g_width) / static_cast<float>(g_height), 0.1f, 100.0f);
 
+#pragma region Uniforms
+
 	GLint mvpMatrixUniform = glGetUniformLocation(modelShaderProgram, "mvpMatrix");
 	GLint textureModelUniform = glGetUniformLocation(textureShaderProgram, "mvpMatrix");
 	GLint textureUniform = glGetUniformLocation(textureShaderProgram, "text");
+
 	GLint modelMatrixLightUniformLocation = glGetUniformLocation(lightShaderProgram, "model");
 	GLint viewMatrixLightUniformLocation = glGetUniformLocation(lightShaderProgram, "view");
 	GLint projectionMatrixLightUniformLocation = glGetUniformLocation(lightShaderProgram, "projection");
+
+	GLint ambientColourUniformLocation = glGetUniformLocation(lightShaderProgram, "ambientColour");
 	GLint objectColorUniformLocation = glGetUniformLocation(lightShaderProgram, "objectColor");
 	GLint lightColorUniformLocation = glGetUniformLocation(lightShaderProgram, "lightColor");
+
 	GLint lightPosUniformLocation = glGetUniformLocation(lightShaderProgram, "lightPos");
 	GLint viewPosUniformLocation = glGetUniformLocation(lightShaderProgram, "viewPos");
+
 	GLint ambientStrengthUniformLocation = glGetUniformLocation(lightShaderProgram, "ambientStrength");
-	GLint ambientColourUniformLocation = glGetUniformLocation(lightShaderProgram, "ambientColour");
 	GLint specularStrengthUniformLocation = glGetUniformLocation(lightShaderProgram, "specularStrength");
 
-	GLint lightDirectionUniform = glGetUniformLocation(modelShaderProgram, "lightDirection");
+	//GLint lightDirectionUniform = glGetUniformLocation(modelShaderProgram, "lightDirection");
+
+#pragma endregion
 
 	while (!glfwWindowShouldClose(window)) {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-#pragma region Controls
+#pragma region Objects Controls
+
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
 		ImGui::Begin("Controls");
 
-		ImGui::SliderFloat("Camera speed", &camSpeed, 0, 200);
-		ImGui::SameLine();
+		ImGui::InputFloat("Camera speed", &camSpeed, 0, 0, "%.2f", 1);
+
+		ImGui::InputFloat("Model rotation speed", &rotationStrength, 1, 1, "%.2f", 1);
+
+		ImGui::SliderFloat("Mouse sensitivity", &cam.mouseSensitivity, 0.001, 1);
+
 		if (ImGui::Button("Reset movemnt speed"))
 			camSpeed = 50.0f;
-
-		ImGui::SliderFloat("Model rotation speed", &rotationStrength, -1000, 1000);
 		ImGui::SameLine();
 		if (ImGui::Button("Reset model rotation speed"))
 			rotationStrength = 100.0f;
-
-		ImGui::SliderFloat("Mouse sensitivity", &cam.mouseSensitivity, 0, 1);
 		ImGui::SameLine();
 		if (ImGui::Button("Reset sensitivity"))
 			cam.mouseSensitivity = 0.1f;
+		ImGui::SameLine();
 
 		ImGui::End();
+
 #pragma endregion
 
 #pragma region LightControl
 
 		ImGui::Begin("LightControl");
 
-		ImGui::SliderFloat("Ambient light Strength", &ambientStrength, 0, 10);
-		ImGui::SameLine();
+		ImGui::InputFloat("Ambient light Strength", &ambientStrength, 0, 0, "%.2f", 1);
+		if (ambientStrength < -99)
+			ambientStrength = -99;
+		if (ambientStrength > 9999)
+			ambientStrength = 9999;
+
+		ImGui::InputFloat("Specular light Strength", &specularStrength, 0, 0, "%.2f", 1);
+
 		if (ImGui::Button("Reset ambient light"))
 			ambientStrength = 0.5f;
-
-		ImGui::SliderFloat("Specular light Strength", &specularStrength, 1, 1024);
 		ImGui::SameLine();
 		if (ImGui::Button("Reset Specular light"))
 			specularStrength = 32.0f;
 
+		ImGui::ColorPicker4("Ambient colour", &ambientColour.x, ambientColour.y, &ambientColour.z);
+		ImGui::ColorPicker4("Object colour", &objectColor.x, objectColor.y, &objectColor.z);
+		ImGui::ColorPicker4("Light colour", &lightColor.x, lightColor.y, &lightColor.z);
+
 		ImGui::End();
 
 #pragma endregion
-
 
 		processInput(window);
 		suzanne.rotate(glm::vec3(0.0f, 1.0f, 0.0f), glm::radians(rotationStrength) * static_cast<float>(deltaTime));
@@ -270,6 +302,8 @@ int main() {
 		finishFrameTime = currentTime;
 
 		float speed = static_cast<float>(camSpeed * deltaTime);
+
+#pragma region Camera Movement
 
 		if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
 			cam.Forward(-speed);
@@ -290,6 +324,9 @@ int main() {
 		if (glfwGetKey(window, GLFW_KEY_X) == GLFW_PRESS)
 			zoom -= 0.01f;
 
+#pragma endregion
+
+#pragma region Camera rotation
 
 		bool cursorLock = false;
 		if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS)
@@ -324,6 +361,8 @@ int main() {
 			cam.Rotate(xoffset, yoffset);
 		}
 
+#pragma endregion
+
 		projection = glm::perspective(glm::radians(45.0f + zoom), static_cast<float>(g_width) / static_cast<float>(g_height), 0.1f, 100.0f);
 
 		view = glm::lookAt(cam.cameraPos, cam.cameraTarget, cam.up);
@@ -353,13 +392,16 @@ int main() {
 		glUniformMatrix4fv(modelMatrixLightUniformLocation, 1, GL_FALSE, glm::value_ptr(suzanne.getModelMatrix()));
 		glUniformMatrix4fv(viewMatrixLightUniformLocation, 1, GL_FALSE, glm::value_ptr(view));
 		glUniformMatrix4fv(projectionMatrixLightUniformLocation, 1, GL_FALSE, glm::value_ptr(projection));
+
+		glUniform3f(ambientColourUniformLocation, ambientColour.x, ambientColour.y, ambientColour.z);
 		glUniform3f(objectColorUniformLocation, objectColor.x, objectColor.y, objectColor.z);
 		glUniform3f(lightColorUniformLocation, lightColor.x, lightColor.y, lightColor.z);
+
 		glUniform3f(lightPosUniformLocation, lightPos.x, lightPos.y, lightPos.z);
-		glUniform1f(ambientStrengthUniformLocation, ambientStrength);
-		glUniform3f(ambientColourUniformLocation, ambientColour.x, ambientColour.y, ambientColour.z);
-		glUniform1f(specularStrengthUniformLocation, specularStrength);
 		glUniform3f(viewPosUniformLocation, cam.cameraPos.x, cam.cameraPos.y, cam.cameraPos.z);
+
+		glUniform1f(ambientStrengthUniformLocation, ambientStrength);
+		glUniform1f(specularStrengthUniformLocation, specularStrength);
 		suzanne.render();
 
 		ImGui::Render();

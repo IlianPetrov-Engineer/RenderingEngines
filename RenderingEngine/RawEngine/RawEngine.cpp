@@ -11,6 +11,8 @@
 #include "core/texture.h"
 #include "Camera.h"
 #include "Light.h"
+#include "SceneManager.h"
+#include "AllScenes.h"
 
 //#define MAC_CLION
 #define VSTUDIO
@@ -117,6 +119,12 @@ int main() {
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
 
+	GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+	const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+
+	g_width = mode->width * 0.75f;
+	g_height = mode->height * 0.75f;
+
 	GLFWwindow* window = glfwCreateWindow(g_width, g_height, "LearnOpenGL", NULL, NULL);
 	if (window == NULL) {
 		printf("Failed to create GLFW window\n");
@@ -184,7 +192,7 @@ int main() {
 	glLinkProgram(lightShaderProgram);
 	glGetProgramiv(lightShaderProgram, GL_LINK_STATUS, &success);
 	if (!success) {
-		glGetProgramInfoLog(textureShaderProgram, 512, NULL, infoLog);
+		glGetProgramInfoLog(lightShaderProgram, 512, NULL, infoLog);
 		printf("Error! Making Shader Program: %s\n", infoLog);
 	}
 
@@ -238,8 +246,13 @@ int main() {
 
 #pragma endregion
 
+	/*SceneManager sceneManager;
+	sceneManager.SetScene(new SceneOne());*/
+
 	while (!glfwWindowShouldClose(window)) {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		printf("Wight & height: (%i, %i)\n", g_width, g_height);
 
 #pragma region Objects Controls
 
@@ -294,6 +307,11 @@ int main() {
 
 #pragma endregion
 
+		/*ImGui::Begin("Scenes");
+		if (ImGui::Button("Scene One"))
+			sceneManager.SetScene(new SceneOne());
+		ImGui::End();*/
+
 		processInput(window);
 		suzanne.rotate(glm::vec3(0.0f, 1.0f, 0.0f), glm::radians(rotationStrength) * static_cast<float>(deltaTime));
 
@@ -302,6 +320,9 @@ int main() {
 		finishFrameTime = currentTime;
 
 		float speed = static_cast<float>(camSpeed * deltaTime);
+
+		/*sceneManager.Update(deltaTime);
+		sceneManager.Render();*/
 
 #pragma region Camera Movement
 

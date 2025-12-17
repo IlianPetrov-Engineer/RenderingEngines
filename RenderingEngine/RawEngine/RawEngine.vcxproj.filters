@@ -54,6 +54,18 @@
     <ClCompile Include="Light.cpp">
       <Filter>Source Files\Mine</Filter>
     </ClCompile>
+    <ClCompile Include="Scene.cpp">
+      <Filter>Source Files\Mine</Filter>
+    </ClCompile>
+    <ClCompile Include="SceneManager.cpp">
+      <Filter>Source Files\Mine</Filter>
+    </ClCompile>
+    <ClCompile Include="AllGameObjects.cpp">
+      <Filter>Source Files\Mine</Filter>
+    </ClCompile>
+    <ClCompile Include="AllScenes.cpp">
+      <Filter>Source Files\Mine</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="core\assimpLoader.h">
@@ -75,6 +87,21 @@
       <Filter>Header Files\Mine</Filter>
     </ClInclude>
     <ClInclude Include="Light.h">
+      <Filter>Header Files\Mine</Filter>
+    </ClInclude>
+    <ClInclude Include="GameObject.h">
+      <Filter>Header Files\Mine</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene.h">
+      <Filter>Header Files\Mine</Filter>
+    </ClInclude>
+    <ClInclude Include="SceneManager.h">
+      <Filter>Header Files\Mine</Filter>
+    </ClInclude>
+    <ClInclude Include="AllGameObjects.h">
+      <Filter>Header Files\Mine</Filter>
+    </ClInclude>
+    <ClInclude Include="AllScenes.h">
       <Filter>Header Files\Mine</Filter>
     </ClInclude>
   </ItemGroup>

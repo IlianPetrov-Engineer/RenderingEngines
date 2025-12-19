@@ -13,6 +13,7 @@
 #include "Light.h"
 #include "SceneManager.h"
 #include "AllScenes.h"
+#include "PostProcessing.h"
 
 //#define MAC_CLION
 #define VSTUDIO
@@ -81,6 +82,8 @@ float deltaTime = 0.0f;
 
 float rotationStrength = 100.0f;
 
+int renderSetting = 0;
+
 #pragma region Mouse input
 
 bool activeMouse = true;
@@ -100,10 +103,12 @@ glm::vec4 ambientColour = glm::vec4(1, 0.01, 0.01, 1);
 glm::vec4 objectColor = glm::vec4(1, 1, 0.01, 1);
 glm::vec4 lightColor = glm::vec4(1, 1, 1, 1);
 
-glm::vec3 lightPos = glm::vec3(2, 0, 0);
+glm::vec3 lightPos = glm::vec3(1, 0, 0);
 
 float ambientStrength = 0.5f;
 float specularStrength = 32.0f;
+
+float diffuseStength = 1.0f;
 
 #pragma endregion
 
@@ -118,6 +123,10 @@ int main() {
 #ifdef __APPLE__
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
+
+	/*unsigned int test;
+	glGenFramebuffers(1, &test);
+	glBindFramebuffer(GL_FRAMEBUFFER, test);*/
 
 	GLFWmonitor* monitor = glfwGetPrimaryMonitor();
 	const GLFWvidmode* mode = glfwGetVideoMode(monitor);
@@ -189,6 +198,8 @@ int main() {
 	const unsigned int lightShaderProgram = glCreateProgram();
 	glAttachShader(lightShaderProgram, lightVertexShader);
 	glAttachShader(lightShaderProgram, lightFragmentShader);
+	/*glAttachShader(lightShaderProgram, modelVertexShader);
+	glAttachShader(lightShaderProgram, textureShader);*/
 	glLinkProgram(lightShaderProgram);
 	glGetProgramiv(lightShaderProgram, GL_LINK_STATUS, &success);
 	if (!success) {
@@ -211,6 +222,7 @@ int main() {
 
 	core::Model suzanne = core::AssimpLoader::loadModel("models/nonormalmonkey.obj");
 	core::Texture cmgtGatoTexture("textures/CMGaTo_crop.png");
+	core::Texture suzanneTexture("textures/Vol_42_1_Base_Color.png");
 
 	glm::vec4 clearColor = glm::vec4(0.2f, 0.2f, 0.2f, 1.0f);
 	glClearColor(clearColor.r,
@@ -241,6 +253,7 @@ int main() {
 
 	GLint ambientStrengthUniformLocation = glGetUniformLocation(lightShaderProgram, "ambientStrength");
 	GLint specularStrengthUniformLocation = glGetUniformLocation(lightShaderProgram, "specularStrength");
+	GLint diffuseStrengthUniformLocation = glGetUniformLocation(lightShaderProgram, "diffuseStength");
 
 	//GLint lightDirectionUniform = glGetUniformLocation(modelShaderProgram, "lightDirection");
 
@@ -249,9 +262,12 @@ int main() {
 	/*SceneManager sceneManager;
 	sceneManager.SetScene(new SceneOne());*/
 
-	while (!glfwWindowShouldClose(window)) {
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	PostProcessing post;
+	post.Init(g_width, g_height);
 
+	while (!glfwWindowShouldClose(window)) {
+		//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	
 		printf("Wight & height: (%i, %i)\n", g_width, g_height);
 
 #pragma region Objects Controls
@@ -267,7 +283,7 @@ int main() {
 
 		ImGui::SliderFloat("Mouse sensitivity", &cam.mouseSensitivity, 0.001, 1);
 
-		if (ImGui::Button("Reset movemnt speed"))
+		if (ImGui::Button("Reset movement speed"))
 			camSpeed = 50.0f;
 		ImGui::SameLine();
 		if (ImGui::Button("Reset model rotation speed"))
@@ -292,6 +308,7 @@ int main() {
 			ambientStrength = 9999;
 
 		ImGui::InputFloat("Specular light Strength", &specularStrength, 0, 0, "%.2f", 1);
+		ImGui::InputFloat("Diffuse light Strength", &diffuseStength, 0, 0, "%.2f", 1);
 
 		if (ImGui::Button("Reset ambient light"))
 			ambientStrength = 0.5f;
@@ -307,10 +324,23 @@ int main() {
 
 #pragma endregion
 
+		ImGui::Begin("Render Settings");
+		if (ImGui::Button("Change render program"))
+			renderSetting += 1;
+		if (renderSetting > 2)
+			renderSetting = 0;
+
+		if (ImGui::Checkbox("Grayscale", &post.grayscale)) {}
+		if (ImGui::Checkbox("Invert", &post.invert)) {}
+
+		ImGui::End();
+
 		/*ImGui::Begin("Scenes");
 		if (ImGui::Button("Scene One"))
 			sceneManager.SetScene(new SceneOne());
 		ImGui::End();*/
+
+		post.BeginRender();
 
 		processInput(window);
 		suzanne.rotate(glm::vec3(0.0f, 1.0f, 0.0f), glm::radians(rotationStrength) * static_cast<float>(deltaTime));
@@ -397,33 +427,63 @@ int main() {
 		glBindVertexArray(0);
 		glActiveTexture(GL_TEXTURE0);
 
+		if (renderSetting == 0)
+		{
+			glUseProgram(modelShaderProgram);
+			glUniformMatrix4fv(mvpMatrixUniform, 1, GL_FALSE, glm::value_ptr(projection * view * suzanne.getModelMatrix()));
+			//glUniform3f(lightDirectionUniform, 1, 0, 0);
+			//suzanne.render();
+			glBindVertexArray(0);
+		}
+
+		else if (renderSetting == 1)
+		{
+			glUseProgram(textureShaderProgram);
+			glUniformMatrix4fv(textureModelUniform, 1, GL_FALSE, glm::value_ptr(projection * view * suzanne.getModelMatrix()));
+			glActiveTexture(GL_TEXTURE0);
+			glUniform1i(textureUniform, 0);
+			glBindTexture(GL_TEXTURE_2D, suzanneTexture.getId());
+			//suzanne.render();
+			glBindVertexArray(0);
+			glActiveTexture(GL_TEXTURE0);
+		}
+		
+		else if (renderSetting == 2)
+		{
+			glUseProgram(lightShaderProgram);
+			glUniformMatrix4fv(modelMatrixLightUniformLocation, 1, GL_FALSE, glm::value_ptr(suzanne.getModelMatrix()));
+			glUniformMatrix4fv(viewMatrixLightUniformLocation, 1, GL_FALSE, glm::value_ptr(view));
+			glUniformMatrix4fv(projectionMatrixLightUniformLocation, 1, GL_FALSE, glm::value_ptr(projection));
+
+			glUniform3f(ambientColourUniformLocation, ambientColour.x, ambientColour.y, ambientColour.z);
+			glUniform3f(objectColorUniformLocation, objectColor.x, objectColor.y, objectColor.z);
+			glUniform3f(lightColorUniformLocation, lightColor.x, lightColor.y, lightColor.z);
+
+			glUniform3f(lightPosUniformLocation, lightPos.x, lightPos.y, lightPos.z);
+			glUniform3f(viewPosUniformLocation, cam.cameraPos.x, cam.cameraPos.y, cam.cameraPos.z);
+
+			glUniform1f(ambientStrengthUniformLocation, ambientStrength);
+			glUniform1f(specularStrengthUniformLocation, specularStrength);
+			glUniform1f(diffuseStrengthUniformLocation, diffuseStength);
+
+			//suzanne.render();
+		}
+
 		/*float timeValue = glfwGetTime();
 		float greenValue = (cos(timeValue) / 2.0f) + 0.5f;
 
 		glClearColor(clearColor.r,
 			greenValue, clearColor.b, clearColor.a);*/
 
-		glUseProgram(modelShaderProgram);
-		glUniformMatrix4fv(mvpMatrixUniform, 1, GL_FALSE, glm::value_ptr(projection * view * suzanne.getModelMatrix()));
-		//glUniform3f(lightDirectionUniform, 1, 0, 0);
-		//suzanne.render();
+		/*glUniformMatrix4fv(textureModelUniform, 1, GL_FALSE, glm::value_ptr(projection * view * suzanne.getModelMatrix()));
+		glActiveTexture(GL_TEXTURE0);
+		glUniform1i(textureUniform, 0);
+		glBindTexture(GL_TEXTURE_2D, suzanneTexture.getId());
 		glBindVertexArray(0);
-
-		glUseProgram(lightShaderProgram);
-		glUniformMatrix4fv(modelMatrixLightUniformLocation, 1, GL_FALSE, glm::value_ptr(suzanne.getModelMatrix()));
-		glUniformMatrix4fv(viewMatrixLightUniformLocation, 1, GL_FALSE, glm::value_ptr(view));
-		glUniformMatrix4fv(projectionMatrixLightUniformLocation, 1, GL_FALSE, glm::value_ptr(projection));
-
-		glUniform3f(ambientColourUniformLocation, ambientColour.x, ambientColour.y, ambientColour.z);
-		glUniform3f(objectColorUniformLocation, objectColor.x, objectColor.y, objectColor.z);
-		glUniform3f(lightColorUniformLocation, lightColor.x, lightColor.y, lightColor.z);
-
-		glUniform3f(lightPosUniformLocation, lightPos.x, lightPos.y, lightPos.z);
-		glUniform3f(viewPosUniformLocation, cam.cameraPos.x, cam.cameraPos.y, cam.cameraPos.z);
-
-		glUniform1f(ambientStrengthUniformLocation, ambientStrength);
-		glUniform1f(specularStrengthUniformLocation, specularStrength);
+		glActiveTexture(GL_TEXTURE0);*/
 		suzanne.render();
+
+		post.EndRender();
 
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

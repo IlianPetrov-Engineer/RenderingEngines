@@ -135,6 +135,7 @@
     <ClCompile Include="core\model.cpp" />
     <ClCompile Include="core\texture.cpp" />
     <ClCompile Include="Light.cpp" />
+    <ClCompile Include="PostProcessing.cpp" />
     <ClCompile Include="RawEngine.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="SceneManager.cpp" />
@@ -150,6 +151,7 @@
     <ClInclude Include="core\vertex.h" />
     <ClInclude Include="GameObject.h" />
     <ClInclude Include="Light.h" />
+    <ClInclude Include="PostProcessing.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="SceneManager.h" />
   </ItemGroup>

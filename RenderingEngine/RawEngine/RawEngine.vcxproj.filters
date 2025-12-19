@@ -66,6 +66,9 @@
     <ClCompile Include="AllScenes.cpp">
       <Filter>Source Files\Mine</Filter>
     </ClCompile>
+    <ClCompile Include="PostProcessing.cpp">
+      <Filter>Source Files\Mine</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="core\assimpLoader.h">
@@ -102,6 +105,9 @@
       <Filter>Header Files\Mine</Filter>
     </ClInclude>
     <ClInclude Include="AllScenes.h">
+      <Filter>Header Files\Mine</Filter>
+    </ClInclude>
+    <ClInclude Include="PostProcessing.h">
       <Filter>Header Files\Mine</Filter>
     </ClInclude>
   </ItemGroup>

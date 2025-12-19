@@ -18,6 +18,8 @@ uniform vec3 ambientColour;
 
 uniform float specularStrength;
 
+uniform float diffuseStength;
+
 void main()
 {
     vec3 ambient = ambientStrength * lightColor * ambientColour;
@@ -25,7 +27,7 @@ void main()
     vec3 norm = normalize(fNor);
     vec3 lightDir = normalize(lightPos - fPos);
     float diff = max(dot(norm, lightDir), 0.0f);
-    vec3 diffuse = diff * lightColor;
+    vec3 diffuse = diff * lightColor * diffuseStength;
 
     vec3 viewDir = normalize(viewPos - fPos);
     vec3 reflectionDir = reflect(-lightDir,norm);

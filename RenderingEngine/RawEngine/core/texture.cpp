@@ -4,6 +4,7 @@
 
 namespace core {
     Texture::Texture(const std::string &path) {
+        stbi_set_flip_vertically_on_load(true);
         glGenTextures(1, &id);
         int width, height, nrComponents;
         if (unsigned char *data = stbi_load(path.c_str(), &width, &height, &nrComponents, 0)) {

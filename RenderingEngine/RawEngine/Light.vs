@@ -11,7 +11,7 @@ uniform mat4 projection;
 
 void main()
 {
-    fPos = vec3(model * vec4(aPos, 1.0));
+    fPos = vec3(model * vec4(aPos, 1.0)); // why 1?
 
     mat3 normalMatrix = transpose(inverse(mat3(model)));
     fNor = normalize(normalMatrix * aNormal);

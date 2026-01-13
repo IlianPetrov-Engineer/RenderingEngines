@@ -7,20 +7,20 @@ public:
     bool grayscale = false;
     bool invert = false;
 
-    void Init(int width, int height);
-    void BeginRender();
-    void EndRender();
+    void Initialise(int width, int height);
+    void Begin();
+    void End();
 
 private:
-    unsigned int fbo = 0;
-    unsigned int colorTexture = 0;
-    unsigned int rbo = 0;
+    unsigned int fbo = 0; //FrameBuffer Object - offscreen rendering
+    unsigned int colourTexture = 0; //stores the final image
+    unsigned int rbo = 0; //RenderBuffer Object
 
     unsigned int quadVAO = 0;
     unsigned int quadVBO = 0;
 
     unsigned int shaderProgram = 0;
 
-    void initQuad();
-    void initShader();
+    void InitialQuad();
+    void InitialShader();
 };

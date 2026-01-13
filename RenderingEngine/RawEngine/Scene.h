@@ -1,11 +1,17 @@
 #pragma once
 #include <vector>
 #include "GameObject.h"
+//#include <vector>
+//#include "GameObject.h"
 
 class Scene
 {
 public:
-	virtual ~Scene();
+	std::vector<GameObject> objects;
+
+	void Render(const glm::mat4& view, const glm::mat4& projection);
+	
+	/*virtual ~Scene();
 
 	virtual void OnEnter() {}
 	virtual void OnExit() {}
@@ -15,5 +21,5 @@ public:
 	void Render();
 
 protected:
-	std::vector<GameObject*> objects;
+	std::vector<GameObject*> objects;*/
 };

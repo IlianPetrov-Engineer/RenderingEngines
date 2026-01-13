@@ -127,13 +127,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="AllGameObjects.cpp" />
-    <ClCompile Include="AllScenes.cpp" />
+    <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="core\assimpLoader.cpp" />
     <ClCompile Include="core\mesh.cpp" />
     <ClCompile Include="core\model.cpp" />
     <ClCompile Include="core\texture.cpp" />
+    <ClCompile Include="DefaultPrograms.cpp" />
     <ClCompile Include="Light.cpp" />
     <ClCompile Include="PostProcessing.cpp" />
     <ClCompile Include="RawEngine.cpp" />
@@ -141,14 +141,13 @@
     <ClCompile Include="SceneManager.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="AllGameObjects.h" />
-    <ClInclude Include="AllScenes.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="core\assimpLoader.h" />
     <ClInclude Include="core\mesh.h" />
     <ClInclude Include="core\model.h" />
     <ClInclude Include="core\texture.h" />
     <ClInclude Include="core\vertex.h" />
+    <ClInclude Include="DefaultPrograms.h" />
     <ClInclude Include="GameObject.h" />
     <ClInclude Include="Light.h" />
     <ClInclude Include="PostProcessing.h" />
@@ -158,6 +157,8 @@
   <ItemGroup>
     <None Include="Light.fs" />
     <None Include="Light.vs" />
+    <None Include="PostProcessing.fs" />
+    <None Include="PostProcessing.vs" />
     <None Include="shaders\fragment.fs" />
     <None Include="shaders\modelVertex.vs" />
     <None Include="shaders\texture.fs" />

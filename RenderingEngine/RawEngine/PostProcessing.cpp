@@ -1,55 +1,43 @@
 #include "PostProcessing.h"
 #include <iostream>
+#include "DefaultPrograms.h"
 
-void PostProcessing::Init(int width, int height)
+void PostProcessing::Initialise(int width, int height)
 {
-    // Framebuffer
     glGenFramebuffers(1, &fbo);
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 
-    // Color texture
-    glGenTextures(1, &colorTexture);
-    glBindTexture(GL_TEXTURE_2D, colorTexture);
+    glGenTextures(1, &colourTexture);
+    glBindTexture(GL_TEXTURE_2D, colourTexture);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0,
         GL_RGB, GL_UNSIGNED_BYTE, nullptr);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    glFramebufferTexture2D(
-        GL_FRAMEBUFFER,
-        GL_COLOR_ATTACHMENT0,
-        GL_TEXTURE_2D,
-        colorTexture,
-        0
-    );
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colourTexture, 0);
 
     glGenRenderbuffers(1, &rbo);
     glBindRenderbuffer(GL_RENDERBUFFER, rbo);
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
-    glFramebufferRenderbuffer(
-        GL_FRAMEBUFFER,
-        GL_DEPTH_STENCIL_ATTACHMENT,
-        GL_RENDERBUFFER,
-        rbo
-    );
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
 
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-        std::cout << "PostProcessor framebuffer not complete\n";
+        std::cout << "PostProcessing framebuffer is not complete\n";
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-    initQuad();
-    initShader();
+    InitialQuad();
+    InitialShader();
 }
 
-void PostProcessing::BeginRender()
+void PostProcessing::Begin()
 {
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
     glEnable(GL_DEPTH_TEST);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
-void PostProcessing::EndRender()
+void PostProcessing::End()
 {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glDisable(GL_DEPTH_TEST);
@@ -61,17 +49,20 @@ void PostProcessing::EndRender()
     glUniform1i(glGetUniformLocation(shaderProgram, "invert"), invert);
 
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, colorTexture);
+    glBindTexture(GL_TEXTURE_2D, colourTexture);
+    // something's missing here...!
+    //  glUniform...
+
     glBindVertexArray(quadVAO);
     glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 
-void PostProcessing::initQuad()
+void PostProcessing::InitialQuad()
 {
     float quadVertices[] = {
         -1,  1,  0, 1,
         -1, -1,  0, 0,
-         1, -1,  1, 0,
+         1, -1,  1, 0, // 0? 1? ???
 
         -1,  1,  0, 1,
          1, -1,  1, 0,
@@ -89,11 +80,10 @@ void PostProcessing::initQuad()
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
 
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float),
-        (void*)(2 * sizeof(float)));
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
 }
 
-void PostProcessing::initShader()
+void PostProcessing::InitialShader()
 {
     const char* vs = R"(#version 400 core
     layout (location = 0) in vec2 aPos;
@@ -118,7 +108,7 @@ void PostProcessing::initShader()
 
         if (grayscale)
         {
-            float g = dot(color, vec3(0.2126, 0.7152, 0.0722));
+            float g = dot(color, vec3(0.2126, 0.7152, 0.0722)); // ponder on this... why + what does the dot product do?
             color = vec3(g);
         }
 
@@ -127,6 +117,18 @@ void PostProcessing::initShader()
 
         FragColor = vec4(color, 1.0);
     })";
+
+   /* GLuint ppVertexShader = generateShader("PostProcessing.vs", GL_VERTEX_SHADER);
+    GLuint ppFragmentShader = generateShader("PostProcessing.fs", GL_FRAGMENT_SHADER);
+
+    int success;
+    char infoLog[512];
+    const unsigned int ppShaderProgram = glCreateProgram();
+    glAttachShader(ppShaderProgram, ppVertexShader);
+    glAttachShader(ppShaderProgram, ppFragmentShader);
+    glLinkProgram(ppShaderProgram);*/
+
+    //glUseProgram(ppShaderProgram);
 
     unsigned int v = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(v, 1, &vs, nullptr);
@@ -143,4 +145,6 @@ void PostProcessing::initShader()
 
     glDeleteShader(v);
     glDeleteShader(f);
+    //glDeleteShader(ppVertexShader);
+    //glDeleteShader(ppFragmentShader);
 }

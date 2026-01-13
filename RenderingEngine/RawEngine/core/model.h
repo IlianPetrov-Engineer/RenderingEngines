@@ -9,6 +9,11 @@ namespace core {
     private:
         std::vector<core::Mesh> meshes;
         glm::mat4 modelMatrix;
+        // option: add 'material properties' here:
+        //float glossiness;
+        //glm::vec3 objectColor;
+        // Even better:
+        //Material mat;  // -> create this class!
     public:
         Model(std::vector<core::Mesh> meshes) : meshes(meshes), modelMatrix(1) {}
 

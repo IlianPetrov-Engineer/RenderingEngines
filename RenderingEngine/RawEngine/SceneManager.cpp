@@ -1,27 +1,34 @@
 #include "SceneManager.h"
 
-void SceneManager::SetScene(Scene* newScene)
+Scene& SceneManager::GetCurrentScene()
 {
-    if (currentScene)
+    return scenes[currentSceneIndex];
+}
+
+void SceneManager::SetScene(int index)
+{
+    if (index >= 0 && index < scenes.size())
     {
-        currentScene->OnExit();
-        delete currentScene;
+        currentSceneIndex = index;
     }
-
-    currentScene = newScene;
-
-    if (currentScene)
-        currentScene->OnEnter();
 }
 
-void SceneManager::Update(float dt)
-{
-    if (currentScene)
-        currentScene->Update(dt);
-}
-
-void SceneManager::Render()
-{
-    if (currentScene)
-        currentScene->Render();
-}
+//void SceneManager::SetScene()
+//{
+//    for (int i = currentSceneIndex; i < 2; i++)
+//    {
+//        
+//    }
+//}
+//
+//void SceneManager::Update(float dt)
+//{
+//    if (currentScene)
+//        currentScene->Update(dt);
+//}
+//
+//void SceneManager::Render()
+//{
+//    if (currentScene)
+//        currentScene->Render();
+//}

@@ -60,13 +60,13 @@
     <ClCompile Include="SceneManager.cpp">
       <Filter>Source Files\Mine</Filter>
     </ClCompile>
-    <ClCompile Include="AllGameObjects.cpp">
-      <Filter>Source Files\Mine</Filter>
-    </ClCompile>
-    <ClCompile Include="AllScenes.cpp">
+    <ClCompile Include="GameObject.cpp">
       <Filter>Source Files\Mine</Filter>
     </ClCompile>
     <ClCompile Include="PostProcessing.cpp">
+      <Filter>Source Files\Mine</Filter>
+    </ClCompile>
+    <ClCompile Include="DefaultPrograms.cpp">
       <Filter>Source Files\Mine</Filter>
     </ClCompile>
   </ItemGroup>
@@ -101,13 +101,10 @@
     <ClInclude Include="SceneManager.h">
       <Filter>Header Files\Mine</Filter>
     </ClInclude>
-    <ClInclude Include="AllGameObjects.h">
-      <Filter>Header Files\Mine</Filter>
-    </ClInclude>
-    <ClInclude Include="AllScenes.h">
-      <Filter>Header Files\Mine</Filter>
-    </ClInclude>
     <ClInclude Include="PostProcessing.h">
+      <Filter>Header Files\Mine</Filter>
+    </ClInclude>
+    <ClInclude Include="DefaultPrograms.h">
       <Filter>Header Files\Mine</Filter>
     </ClInclude>
   </ItemGroup>
@@ -128,6 +125,12 @@
       <Filter>Resource Files\Shaders\Mine</Filter>
     </None>
     <None Include="Light.fs">
+      <Filter>Resource Files\Shaders\Mine</Filter>
+    </None>
+    <None Include="PostProcessing.vs">
+      <Filter>Resource Files\Shaders\Mine</Filter>
+    </None>
+    <None Include="PostProcessing.fs">
       <Filter>Resource Files\Shaders\Mine</Filter>
     </None>
   </ItemGroup>

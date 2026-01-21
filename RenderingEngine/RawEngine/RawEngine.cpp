@@ -175,7 +175,7 @@ int main() {
 
 	int success;
 	char infoLog[512];
-	const unsigned int modelShaderProgram = glCreateProgram(); // shader used for the monkey uses modelVertex as vertex shader, and fragment.fs as fragment shader
+	const unsigned int modelShaderProgram = glCreateProgram();
 	glAttachShader(modelShaderProgram, modelVertexShader);
 	glAttachShader(modelShaderProgram, fragmentShader);
 	glLinkProgram(modelShaderProgram);
@@ -248,23 +248,36 @@ int main() {
 	quadModel.scale(glm::vec3(5, 5, 1));
 	
 	core::Model suzanne = core::AssimpLoader::loadModel("models/nonormalmonkey.obj");
-	/*core::Model apple = core::AssimpLoader::loadModel("models/Apple.obj");
-	core::Texture appleTexture("textures/texture.png");*/
+	core::Model mango = core::AssimpLoader::loadModel("models/mango.fbx");
+
 	core::Texture cmgtGatoTexture("textures/CMGaTo_crop.png");
 	core::Texture suzanneTexture("textures/Vol_42_1_Base_Color.png");
+	core::Texture mangoTexture("textures/mango_Material.001_BaseColor.png");
+
+	mango.translate(glm::vec3(0, 3, 0));
+	mango.rotate(glm::vec3(1.0f, 0.0f, 0.0f),-45);
+	mango.rotate(glm::vec3(0.0f, 0.0f, 1.0f), 180);
+
+	mango.setObjectColor(objectColor);
+	mango.setSpecularStrength(specularStrength);
 
 	scene0.objects.push_back(GameObject(quadModel, &cmgtGatoTexture, textureShaderProgram, textureModelUniform, textureUniform));
 	scene0.objects.push_back(GameObject(suzanne, &suzanneTexture, textureShaderProgram, textureModelUniform, textureUniform));
 	scene1.objects.push_back(GameObject(suzanne, NULL, modelShaderProgram, NULL, NULL));
-	//scene2.objects.push_back(GameObject(suzanne, NULL, lightShaderProgram, modelMatrixLightUniformLocation, projectionMatrixLightUniformLocation));
-	//scene2.objects.push_back(GameObject(apple, &appleTexture, textureShaderProgram, textureModelUniform, textureUniform));
+	scene1.objects.push_back(GameObject(mango, &mangoTexture, textureShaderProgram, textureModelUniform, textureUniform));
+	scene2.objects.push_back(GameObject(mango, NULL, lightShaderProgram, NULL, NULL));
+
+	scene2.ambientColour = ambientColour;
+	scene2.lightColor = lightColor;
+	scene2.lightPos = lightPos;
+
+	scene2.ambientStrength = ambientStrength;
+	scene2.diffuseStrength = diffuseStength;
 
 	SceneManager sceneManager;
 	sceneManager.scenes.push_back(scene0);
 	sceneManager.scenes.push_back(scene1);
 	sceneManager.scenes.push_back(scene2);
-	 
-	//apple.translate(glm::vec3(1,5,1));
 
 	glm::vec4 clearColor = glm::vec4(0.2f, 0.2f, 0.2f, 1.0f);
 	glClearColor(clearColor.r,
@@ -282,7 +295,7 @@ int main() {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	
 		post.Begin();
-		//printf("Wight & height: (%i, %i)\n", g_width, g_height);
+
 		Scene& currentSceene = sceneManager.GetCurrentScene();
 
 #pragma region GUI
@@ -362,10 +375,29 @@ int main() {
 #pragma endregion
 
 		processInput(window);
-		//suzanne.rotate(glm::vec3(0.0f, 1.0f, 0.0f), glm::radians(rotationStrength) * static_cast<float>(deltaTime));
 
 		sceneManager.scenes[0].objects[1].model.rotate(glm::vec3(0.0f, 1.0f, 0.0f), glm::radians(rotationStrength) * static_cast<float>(deltaTime));
+		sceneManager.scenes[2].objects[0].model.setObjectColor(objectColor);
+		sceneManager.scenes[2].objects[0].model.setSpecularStrength(specularStrength);
 
+		if (sceneManager.currentSceneIndex == 2)
+		{
+			currentSceene.ambientColour = ambientColour;
+
+			currentSceene.lightColor = lightColor;
+			currentSceene.lightPos = lightPos;
+
+			currentSceene.ambientStrength = ambientStrength;
+			currentSceene.diffuseStrength = diffuseStength;
+
+			currentSceene.LitRender(lightShaderProgram, modelMatrixLightUniformLocation, viewMatrixLightUniformLocation,
+				projectionMatrixLightUniformLocation, objectColorUniformLocation, specularStrengthUniformLocation, ambientColourUniformLocation,
+				lightColorUniformLocation, lightPosUniformLocation, viewPosUniformLocation, ambientStrengthUniformLocation, diffuseStrengthUniformLocation,
+				view, projection, cam);
+		}
+
+		else
+			sceneManager.GetCurrentScene().Render(view, projection);
 
 		float currentTime = glfwGetTime();
 		deltaTime = currentTime - finishFrameTime;
@@ -438,57 +470,21 @@ int main() {
 		view = glm::lookAt(cam.cameraPos, cam.cameraTarget, cam.up);
 
 		glUseProgram(textureShaderProgram);
-		/*glUniformMatrix4fv(textureModelUniform, 1, GL_FALSE, glm::value_ptr(projection * view * quadModel.getModelMatrix()));
-		glActiveTexture(GL_TEXTURE2);*/
 		glUniform1i(textureUniform, 2);
-		/*glBindTexture(GL_TEXTURE_2D, cmgtGatoTexture.getId());
-		quadModel.render();
-		glBindVertexArray(0);
-		glActiveTexture(GL_TEXTURE0);*/
 
 
 		if (renderSetting == 0)
 		{
 			glUseProgram(modelShaderProgram);
-			/*glUniformMatrix4fv(mvpMatrixUniform, 1, GL_FALSE, glm::value_ptr(projection * view * suzanne.getModelMatrix()));
-			glUniform3f(lightDirectionUniform, 1, 0, 0
-			glBindVertexArray(0);*/
 		}
 
-		if (renderSetting == 1)
-		{
-			glUseProgram(textureShaderProgram);
-			/*glUniformMatrix4fv(textureModelUniform, 1, GL_FALSE, glm::value_ptr(projection * view * suzanne.getModelMatrix()));
-			glActiveTexture(GL_TEXTURE0);*/
-			glUniform1i(textureUniform, 0);
-			/*glBindTexture(GL_TEXTURE_2D, suzanneTexture.getId());
-			glBindVertexArray(0);
-			glActiveTexture(GL_TEXTURE0);*/
-		}
-		
-		else if (renderSetting == 2)
-		{
-			glUseProgram(lightShaderProgram);
-			glUniformMatrix4fv(modelMatrixLightUniformLocation, 1, GL_FALSE, glm::value_ptr(suzanne.getModelMatrix()));
-			glUniformMatrix4fv(viewMatrixLightUniformLocation, 1, GL_FALSE, glm::value_ptr(view));
-			glUniformMatrix4fv(projectionMatrixLightUniformLocation, 1, GL_FALSE, glm::value_ptr(projection));
-
-			glUniform3f(ambientColourUniformLocation, ambientColour.x, ambientColour.y, ambientColour.z);
-			glUniform3f(objectColorUniformLocation, objectColor.x, objectColor.y, objectColor.z);
-			glUniform3f(lightColorUniformLocation, lightColor.x, lightColor.y, lightColor.z);
-
-			glUniform3f(lightPosUniformLocation, lightPos.x, lightPos.y, lightPos.z);
-			glUniform3f(viewPosUniformLocation, cam.cameraPos.x, cam.cameraPos.y, cam.cameraPos.z);
-
-			glUniform1f(ambientStrengthUniformLocation, ambientStrength);
-			glUniform1f(specularStrengthUniformLocation, specularStrength); // light property or material property...?
-			glUniform1f(diffuseStrengthUniformLocation, diffuseStength);
-		}
-
-		sceneManager.GetCurrentScene().Render(view, projection);
-
-		/*suzanne.render();
-		apple.render();*/
+		/*if (sceneManager.currentSceneIndex == 2)
+			sceneManager.GetCurrentScene().LitRender(lightShaderProgram, modelMatrixLightUniformLocation, viewMatrixLightUniformLocation,
+			projectionMatrixLightUniformLocation, objectColorUniformLocation, specularStrengthUniformLocation, ambientColourUniformLocation,
+			lightColorUniformLocation, lightPosUniformLocation, viewPosUniformLocation, ambientStrengthUniformLocation, diffuseStrengthUniformLocation,
+			view, projection, cam);
+		else
+			sceneManager.GetCurrentScene().Render(view, projection);*/
 
 		post.End();
 

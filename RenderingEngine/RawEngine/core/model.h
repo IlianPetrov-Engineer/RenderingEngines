@@ -9,6 +9,9 @@ namespace core {
     private:
         std::vector<core::Mesh> meshes;
         glm::mat4 modelMatrix;
+
+        glm::vec3 objectColor = glm::vec3(1.0f);
+        float specularStrength = 32.0f;
         // option: add 'material properties' here:
         //float glossiness;
         //glm::vec3 objectColor;
@@ -23,5 +26,25 @@ namespace core {
         void rotate(glm::vec3 axis, float radians);
         void scale(glm::vec3 scale);
         glm::mat4 getModelMatrix() const;
+
+        void setObjectColor(const glm::vec3& color) 
+        { 
+            objectColor = color; 
+        }
+
+        void setSpecularStrength(float strength) 
+        { 
+            specularStrength = strength; 
+        }
+
+        glm::vec3 getObjectColor() const 
+        { 
+            return objectColor; 
+        }
+
+        float getSpecularStrength() const 
+        { 
+            return specularStrength; 
+        }
     };
 }

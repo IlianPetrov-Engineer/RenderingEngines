@@ -26,13 +26,9 @@ void GameObject::LitRender(GLuint shader, GLint modelUniform, GLint viewUniform,
     GLint specularStrengthUniform, const glm::mat4& view, const glm::mat4& projection)
 {
     glUseProgram(shader);
-
-    glUniformMatrix4fv(modelUniform, 1, GL_FALSE,
-        glm::value_ptr(model.getModelMatrix()));
-    glUniformMatrix4fv(viewUniform, 1, GL_FALSE,
-        glm::value_ptr(view));
-    glUniformMatrix4fv(projectionUniform, 1, GL_FALSE,
-        glm::value_ptr(projection));
+    glUniformMatrix4fv(modelUniform, 1, GL_FALSE, glm::value_ptr(model.getModelMatrix()));
+    glUniformMatrix4fv(viewUniform, 1, GL_FALSE, glm::value_ptr(view));
+    glUniformMatrix4fv(projectionUniform, 1, GL_FALSE, glm::value_ptr(projection));
 
     glm::vec3 color = model.getObjectColor();
     glUniform3f(objectColorUniform, color.x, color.y, color.z);
@@ -40,42 +36,3 @@ void GameObject::LitRender(GLuint shader, GLint modelUniform, GLint viewUniform,
 
     model.render();
 }
-
-
-//#include "AllGameObjects.h"
-//#include <glm/gtc/matrix_transform.hpp>
-//#include <glm/gtc/type_ptr.hpp>
-//#include <glad/glad.h> 
-//
-//extern float rotationStrength;
-
-//Suzanne::Suzanne()
-//{
-//    model.render();
-//}
-//
-//void Suzanne::Update(float holder)
-//{
-//    model.rotate(glm::vec3(0, 1, 0),
-//        glm::radians(rotationStrength) * holder);
-//}
-//
-//void Suzanne::Render()
-//{
-//    model.render();
-//}
-//
-//
-//QuadImage::QuadImage()
-//{
-//    core::Mesh quad = core::Mesh::generateQuad();
-//    model = core::Model({ quad });
-//
-//    model.translate(glm::vec3(0, 0, -2.5f));
-//    model.scale(glm::vec3(5, 5, 1));
-//}
-//
-//void QuadImage::Render()
-//{
-//    model.render();
-//}

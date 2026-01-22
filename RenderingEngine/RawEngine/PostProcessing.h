@@ -7,6 +7,11 @@ public:
     bool grayscale = false;
     bool invert = false;
 
+    bool pixelize = false;
+    float pixelAmount = 64.0f;
+
+    bool edge = false;
+
     void Initialise(int width, int height);
     void Begin();
     void End();

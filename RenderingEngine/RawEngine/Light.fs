@@ -11,7 +11,6 @@ uniform vec3 lightColor;
 
 uniform vec3 viewPos;
 
-
 uniform float ambientStrength;
 
 uniform vec3 ambientColour;

@@ -12,23 +12,3 @@ void SceneManager::SetScene(int index)
         currentSceneIndex = index;
     }
 }
-
-//void SceneManager::SetScene()
-//{
-//    for (int i = currentSceneIndex; i < 2; i++)
-//    {
-//        
-//    }
-//}
-//
-//void SceneManager::Update(float dt)
-//{
-//    if (currentScene)
-//        currentScene->Update(dt);
-//}
-//
-//void SceneManager::Render()
-//{
-//    if (currentScene)
-//        currentScene->Render();
-//}

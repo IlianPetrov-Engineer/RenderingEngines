@@ -12,11 +12,7 @@ namespace core {
 
         glm::vec3 objectColor = glm::vec3(1.0f);
         float specularStrength = 32.0f;
-        // option: add 'material properties' here:
-        //float glossiness;
-        //glm::vec3 objectColor;
-        // Even better:
-        //Material mat;  // -> create this class!
+        
     public:
         Model(std::vector<core::Mesh> meshes) : meshes(meshes), modelMatrix(1) {}
 

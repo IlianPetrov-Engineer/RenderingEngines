@@ -13,7 +13,6 @@
 #include "Camera.h"
 #include "Light.h"
 #include "SceneManager.h"
-//#include "AllScenes.h"
 #include "PostProcessing.h"
 #include "DefaultPrograms.h"
 
@@ -48,34 +47,6 @@ void framebufferSizeCallback(GLFWwindow* window,
 	g_height = height;
 	glViewport(0, 0, width, height);
 }
-
-/*std::string readFileToString(const std::string& filePath) {
-	std::ifstream fileStream(filePath, std::ios::in);
-	if (!fileStream.is_open()) {
-		printf("Could not open file: %s\n", filePath.c_str());
-		return "";
-	}
-	std::stringstream buffer;
-	buffer << fileStream.rdbuf();
-	return buffer.str();
-}
-
-GLuint generateShader(const std::string& shaderPath, GLuint shaderType) {
-	printf("Loading shader: %s\n", shaderPath.c_str());
-	const std::string shaderText = readFileToString(shaderPath);
-	const GLuint shader = glCreateShader(shaderType);
-	const char* s_str = shaderText.c_str();
-	glShaderSource(shader, 1, &s_str, nullptr);
-	glCompileShader(shader);
-	GLint success = 0;
-	glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
-	if (!success) {
-		char infoLog[512];
-		glGetShaderInfoLog(shader, 512, NULL, infoLog);
-		printf("Error! Shader issue [%s]: %s\n", shaderPath.c_str(), infoLog);
-	}
-	return shader;
-}*/
 
 #pragma region Variables
 
@@ -246,33 +217,30 @@ int main() {
 	core::Model quadModel({ quad });
 	quadModel.translate(glm::vec3(0, 0, -2.5));
 	quadModel.scale(glm::vec3(5, 5, 1));
-	
+
+	core::Mesh mineraft = core::Mesh::generateQuad();
+	core::Model minecraftModel({ mineraft });
+	minecraftModel.translate(glm::vec3(0, 0, -2.5));
+	minecraftModel.scale(glm::vec3(9, 5, 1));
+
 	core::Model suzanne = core::AssimpLoader::loadModel("models/nonormalmonkey.obj");
 	core::Model mango = core::AssimpLoader::loadModel("models/mango.fbx");
 
 	core::Texture cmgtGatoTexture("textures/CMGaTo_crop.png");
 	core::Texture suzanneTexture("textures/Vol_42_1_Base_Color.png");
 	core::Texture mangoTexture("textures/mango_Material.001_BaseColor.png");
+	core::Texture minecraftTexture("textures/1.png");
 
 	mango.translate(glm::vec3(0, 3, 0));
 	mango.rotate(glm::vec3(1.0f, 0.0f, 0.0f),-45);
 	mango.rotate(glm::vec3(0.0f, 0.0f, 1.0f), 180);
 
-	mango.setObjectColor(objectColor);
-	mango.setSpecularStrength(specularStrength);
-
 	scene0.objects.push_back(GameObject(quadModel, &cmgtGatoTexture, textureShaderProgram, textureModelUniform, textureUniform));
 	scene0.objects.push_back(GameObject(suzanne, &suzanneTexture, textureShaderProgram, textureModelUniform, textureUniform));
-	scene1.objects.push_back(GameObject(suzanne, NULL, modelShaderProgram, NULL, NULL));
+	scene1.objects.push_back(GameObject(minecraftModel, &minecraftTexture, textureShaderProgram, textureModelUniform, textureUniform));
 	scene1.objects.push_back(GameObject(mango, &mangoTexture, textureShaderProgram, textureModelUniform, textureUniform));
 	scene2.objects.push_back(GameObject(mango, NULL, lightShaderProgram, NULL, NULL));
-
-	scene2.ambientColour = ambientColour;
-	scene2.lightColor = lightColor;
-	scene2.lightPos = lightPos;
-
-	scene2.ambientStrength = ambientStrength;
-	scene2.diffuseStrength = diffuseStength;
+	scene2.objects.push_back(GameObject(suzanne, NULL, lightShaderProgram, NULL, NULL));
 
 	SceneManager sceneManager;
 	sceneManager.scenes.push_back(scene0);
@@ -296,7 +264,7 @@ int main() {
 	
 		post.Begin();
 
-		Scene& currentSceene = sceneManager.GetCurrentScene();
+		Scene& currentScene = sceneManager.GetCurrentScene();
 
 #pragma region GUI
 
@@ -324,37 +292,42 @@ int main() {
 				cam.mouseSensitivity = 0.1f;
 		}
 
-		if (ImGui::CollapsingHeader("Light"))
+		if (sceneManager.currentSceneIndex == 2)
 		{
-			ImGui::InputFloat("Ambient light Strength", &ambientStrength, 0, 0, "%.2f", 1);
-			if (ambientStrength < -99)
-				ambientStrength = -99;
-			if (ambientStrength > 9999)
-				ambientStrength = 9999;
+			if (ImGui::CollapsingHeader("Light"))
+			{
+				ImGui::InputFloat("Ambient light Strength", &ambientStrength, 0, 0, "%.2f", 1);
+				if (ambientStrength < -99)
+					ambientStrength = -99;
+				if (ambientStrength > 9999)
+					ambientStrength = 9999;
 
-			ImGui::InputFloat("Specular light Strength", &specularStrength, 0, 0, "%.2f", 1);
-			ImGui::InputFloat("Diffuse light Strength", &diffuseStength, 0, 0, "%.2f", 1);
+				ImGui::InputFloat("Specular light Strength", &specularStrength, 0, 0, "%.2f", 1);
+				ImGui::InputFloat("Diffuse light Strength", &diffuseStength, 0, 0, "%.2f", 1);
 
-			if (ImGui::Button("Reset ambient light"))
-				ambientStrength = 0.5f;
-			ImGui::SameLine();
-			if (ImGui::Button("Reset Specular light"))
-				specularStrength = 32.0f;
+				if (ImGui::Button("Reset ambient light"))
+					ambientStrength = 0.5f;
+				ImGui::SameLine();
+				if (ImGui::Button("Reset Specular light"))
+					specularStrength = 32.0f;
 
-			ImGui::ColorPicker4("Ambient colour", &ambientColour.x, ambientColour.y, &ambientColour.z);
-			ImGui::ColorPicker4("Object colour", &objectColor.x, objectColor.y, &objectColor.z);
-			ImGui::ColorPicker4("Light colour", &lightColor.x, lightColor.y, &lightColor.z);
+				ImGui::ColorPicker4("Ambient colour", &ambientColour.x, ambientColour.y, &ambientColour.z);
+				ImGui::ColorPicker4("Object colour", &objectColor.x, objectColor.y, &objectColor.z);
+				ImGui::ColorPicker4("Light colour", &lightColor.x, lightColor.y, &lightColor.z);
+			}
 		}
 
 		if (ImGui::CollapsingHeader("Render"))
 		{
-			/*if (ImGui::Button("Change render program"))
-				renderSetting += 1;
-			if (renderSetting > 2)
-				renderSetting = 0;*/
-
 			if (ImGui::Checkbox("Grayscale", &post.grayscale)) {}
 			if (ImGui::Checkbox("Invert", &post.invert)) {}
+
+			ImGui::Checkbox("Pixelize", &post.pixelize);
+
+			if (post.pixelize)
+				ImGui::SliderFloat("Pixel Size", &post.pixelAmount, 4.0f, 1440.0f);
+
+			if (ImGui::Checkbox("Edge", &post.edge)) {}
 		}
 
 		if (ImGui::Button("Scene 0"))
@@ -364,12 +337,6 @@ int main() {
 		if (ImGui::Button("Scene 2"))
 			sceneManager.SetScene(2);
 
-		/*for (int i = 0; i < currentSceene.objects.size(); i++) 
-		{
-			if (ImGui::Button("Test: " + currentSceene.objects[i]))
-				currentSceene.objects[i].model.rotate(glm::vec3(0.0f, 1.0f, 0.0f), glm::radians(rotationStrength) * static_cast<float>(deltaTime));
-		}*/
-
 		ImGui::End();
 
 #pragma endregion
@@ -377,20 +344,24 @@ int main() {
 		processInput(window);
 
 		sceneManager.scenes[0].objects[1].model.rotate(glm::vec3(0.0f, 1.0f, 0.0f), glm::radians(rotationStrength) * static_cast<float>(deltaTime));
-		sceneManager.scenes[2].objects[0].model.setObjectColor(objectColor);
-		sceneManager.scenes[2].objects[0].model.setSpecularStrength(specularStrength);
 
 		if (sceneManager.currentSceneIndex == 2)
 		{
-			currentSceene.ambientColour = ambientColour;
+			currentScene.ambientColour = ambientColour;
 
-			currentSceene.lightColor = lightColor;
-			currentSceene.lightPos = lightPos;
+			currentScene.lightColor = lightColor;
+			currentScene.lightPos = lightPos;
 
-			currentSceene.ambientStrength = ambientStrength;
-			currentSceene.diffuseStrength = diffuseStength;
+			currentScene.ambientStrength = ambientStrength;
+			currentScene.diffuseStrength = diffuseStength;
 
-			currentSceene.LitRender(lightShaderProgram, modelMatrixLightUniformLocation, viewMatrixLightUniformLocation,
+			currentScene.objects[0].model.setObjectColor(objectColor);
+			currentScene.objects[0].model.setSpecularStrength(specularStrength);
+
+			currentScene.objects[0].model.rotate(glm::vec3(0.0f, 0.0f, 1.0f), glm::radians(rotationStrength) * static_cast<float>(deltaTime));
+			currentScene.objects[1].model.rotate(glm::vec3(1.0f, 0.0f, 0.0f), glm::radians(-rotationStrength) * static_cast<float>(deltaTime));
+
+			currentScene.LitRender(lightShaderProgram, modelMatrixLightUniformLocation, viewMatrixLightUniformLocation,
 				projectionMatrixLightUniformLocation, objectColorUniformLocation, specularStrengthUniformLocation, ambientColourUniformLocation,
 				lightColorUniformLocation, lightPosUniformLocation, viewPosUniformLocation, ambientStrengthUniformLocation, diffuseStrengthUniformLocation,
 				view, projection, cam);
@@ -469,22 +440,14 @@ int main() {
 
 		view = glm::lookAt(cam.cameraPos, cam.cameraTarget, cam.up);
 
-		glUseProgram(textureShaderProgram);
-		glUniform1i(textureUniform, 2);
+		//glUseProgram(textureShaderProgram);
+		//glUniform1i(textureUniform, 2);
 
 
-		if (renderSetting == 0)
-		{
-			glUseProgram(modelShaderProgram);
-		}
-
-		/*if (sceneManager.currentSceneIndex == 2)
-			sceneManager.GetCurrentScene().LitRender(lightShaderProgram, modelMatrixLightUniformLocation, viewMatrixLightUniformLocation,
-			projectionMatrixLightUniformLocation, objectColorUniformLocation, specularStrengthUniformLocation, ambientColourUniformLocation,
-			lightColorUniformLocation, lightPosUniformLocation, viewPosUniformLocation, ambientStrengthUniformLocation, diffuseStrengthUniformLocation,
-			view, projection, cam);
-		else
-			sceneManager.GetCurrentScene().Render(view, projection);*/
+		//if (renderSetting == 0)
+		//{
+		//	glUseProgram(modelShaderProgram);
+		//}
 
 		post.End();
 

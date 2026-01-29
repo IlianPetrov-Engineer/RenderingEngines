@@ -51,9 +51,6 @@
     <ClCompile Include="Camera.cpp">
       <Filter>Source Files\Mine</Filter>
     </ClCompile>
-    <ClCompile Include="Light.cpp">
-      <Filter>Source Files\Mine</Filter>
-    </ClCompile>
     <ClCompile Include="Scene.cpp">
       <Filter>Source Files\Mine</Filter>
     </ClCompile>
@@ -87,9 +84,6 @@
       <Filter>Header Files\Core</Filter>
     </ClInclude>
     <ClInclude Include="Camera.h">
-      <Filter>Header Files\Mine</Filter>
-    </ClInclude>
-    <ClInclude Include="Light.h">
       <Filter>Header Files\Mine</Filter>
     </ClInclude>
     <ClInclude Include="GameObject.h">
@@ -128,9 +122,6 @@
       <Filter>Resource Files\Shaders\Mine</Filter>
     </None>
     <None Include="PostProcessing.vs">
-      <Filter>Resource Files\Shaders\Mine</Filter>
-    </None>
-    <None Include="PostProcessing.fs">
       <Filter>Resource Files\Shaders\Mine</Filter>
     </None>
     <None Include="FinalShader.fs">

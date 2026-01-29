@@ -134,7 +134,6 @@
     <ClCompile Include="core\model.cpp" />
     <ClCompile Include="core\texture.cpp" />
     <ClCompile Include="DefaultPrograms.cpp" />
-    <ClCompile Include="Light.cpp" />
     <ClCompile Include="PostProcessing.cpp" />
     <ClCompile Include="RawEngine.cpp" />
     <ClCompile Include="Scene.cpp" />
@@ -149,7 +148,6 @@
     <ClInclude Include="core\vertex.h" />
     <ClInclude Include="DefaultPrograms.h" />
     <ClInclude Include="GameObject.h" />
-    <ClInclude Include="Light.h" />
     <ClInclude Include="PostProcessing.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="SceneManager.h" />
@@ -162,7 +160,6 @@
     <None Include="Light.fs" />
     <None Include="Light.vs" />
     <None Include="PixelizeShader.fs" />
-    <None Include="PostProcessing.fs" />
     <None Include="PostProcessing.vs" />
     <None Include="shaders\fragment.fs" />
     <None Include="shaders\modelVertex.vs" />

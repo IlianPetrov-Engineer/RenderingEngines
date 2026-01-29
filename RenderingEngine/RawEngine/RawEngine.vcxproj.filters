@@ -133,5 +133,20 @@
     <None Include="PostProcessing.fs">
       <Filter>Resource Files\Shaders\Mine</Filter>
     </None>
+    <None Include="FinalShader.fs">
+      <Filter>Resource Files\Shaders\Mine</Filter>
+    </None>
+    <None Include="GrayscaleShader.fs">
+      <Filter>Resource Files\Shaders\Mine</Filter>
+    </None>
+    <None Include="InvertShader.fs">
+      <Filter>Resource Files\Shaders\Mine</Filter>
+    </None>
+    <None Include="PixelizeShader.fs">
+      <Filter>Resource Files\Shaders\Mine</Filter>
+    </None>
+    <None Include="EdgeDetectionShader.fs">
+      <Filter>Resource Files\Shaders\Mine</Filter>
+    </None>
   </ItemGroup>
 </Project>

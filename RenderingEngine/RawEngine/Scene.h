@@ -15,9 +15,19 @@ public:
 	float ambientStrength = 0.1f;
 	float diffuseStrength = 1.0f;
 
-	void Render(const glm::mat4& view, const glm::mat4& projection);
+	GLuint shaderProgram = 0;
+    GLint modelUniform = -1;
+    GLint viewUniform = -1;
+    GLint projectionUniform = -1;
+    GLint objectColorUniform = -1;
+    GLint specularStrengthUniform = -1;
+    GLint ambientColourUniform = -1;
+    GLint lightColorUniform = -1;
+    GLint lightPosUniform = -1;
+    GLint viewPosUniform = -1;
+    GLint ambientStrengthUniform = -1;
+    GLint diffuseStrengthUniform = -1;
+    GLint textureUniform = -1;
 
-	void LitRender(GLuint shader, GLint modelUniform, GLint viewUniform, GLint projectionUniform,GLint objectColorUniform, 
-		GLint specularStrengthUniform, GLint ambientColourUniform, GLint lightColorUniform, GLint lightPosUniform,GLint viewPosUniform,
-        GLint ambientStrengthUniform, GLint diffuseStrengthUniform, const glm::mat4& view, const glm::mat4& projection, const Camera& cam);
+    void Render(const Camera& cam, const glm::mat4& view, const glm::mat4& projection);
 };

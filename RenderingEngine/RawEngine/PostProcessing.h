@@ -12,20 +12,26 @@ public:
 
     bool edge = false;
 
-    void Initialise(int width, int height);
-    void Begin();
-    void End();
+    void Init(int width, int height);
+    void BeginRender();
+    GLuint ApplyEffect();
+    void EndRender(GLuint texture);
 
 private:
-    unsigned int fbo = 0; //FrameBuffer Object - offscreen rendering
-    unsigned int colourTexture = 0; //stores the final image
-    unsigned int rbo = 0; //RenderBuffer Object
 
-    unsigned int quadVAO = 0;
-    unsigned int quadVBO = 0;
+    GLuint fboA, fboB;
+    GLuint texA, texB;
+    GLuint rbo;
 
-    unsigned int shaderProgram = 0;
+    GLuint quadVAO, quadVBO;
 
-    void InitialQuad();
-    void InitialShader();
+    GLuint grayscaleShader;
+    GLuint invertShader;
+    GLuint pixelShader;
+    GLuint edgeDetectionShader;
+    GLuint finalShader;
+
+    bool multipass = true;
+
+    void InitFrameBuffer(GLuint& fbo, GLuint& texture, int widht, int height);
 };

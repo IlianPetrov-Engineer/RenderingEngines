@@ -155,8 +155,13 @@
     <ClInclude Include="SceneManager.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="EdgeDetectionShader.fs" />
+    <None Include="FinalShader.fs" />
+    <None Include="GrayscaleShader.fs" />
+    <None Include="InvertShader.fs" />
     <None Include="Light.fs" />
     <None Include="Light.vs" />
+    <None Include="PixelizeShader.fs" />
     <None Include="PostProcessing.fs" />
     <None Include="PostProcessing.vs" />
     <None Include="shaders\fragment.fs" />

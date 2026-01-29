@@ -1,33 +1,42 @@
 #include "Scene.h"
+#include <glm/gtc/type_ptr.hpp>
 
-void Scene::Render(const glm::mat4& view, const glm::mat4& projection)
+void Scene::Render(const Camera& cam, const glm::mat4& view, const glm::mat4& projection)
 {
-    for (int i = 0; i < objects.size(); i++)
+    glUseProgram(shaderProgram);
+
+    glUniformMatrix4fv(viewUniform, 1, GL_FALSE, glm::value_ptr(view));
+    glUniformMatrix4fv(projectionUniform, 1, GL_FALSE, glm::value_ptr(projection));
+
+    if (ambientColourUniform != -1)
     {
-        objects[i].Render(view, projection);
+        glUniform3fv(ambientColourUniform, 1, &ambientColour.x);
+        glUniform3fv(lightColorUniform, 1, &lightColor.x);
+        glUniform3fv(lightPosUniform, 1, &lightPos.x);
+        glUniform3fv(viewPosUniform, 1, &cam.cameraPos.x);
+        glUniform1f(ambientStrengthUniform, ambientStrength);
+        glUniform1f(diffuseStrengthUniform, diffuseStrength);
     }
-}
 
-void Scene::LitRender(GLuint shader, GLint modelUniform, GLint viewUniform, GLint projectionUniform, GLint objectColorUniform,
-    GLint specularStrengthUniform, GLint ambientColourUniform, GLint lightColorUniform, GLint lightPosUniform, GLint viewPosUniform,
-    GLint ambientStrengthUniform, GLint diffuseStrengthUniform, const glm::mat4& view, const glm::mat4& projection, const Camera& cam)
-{
-    glUseProgram(shader);
-
-    glUniform3f(ambientColourUniform, ambientColour.x, ambientColour.y, ambientColour.z);
-
-    glUniform3f(lightColorUniform,lightColor.x, lightColor.y, lightColor.z);
-
-    glUniform3f(lightPosUniform,lightPos.x, lightPos.y, lightPos.z);
-
-    glUniform3f(viewPosUniform,cam.cameraPos.x, cam.cameraPos.y, cam.cameraPos.z);
-
-    glUniform1f(ambientStrengthUniform, ambientStrength);
-    glUniform1f(diffuseStrengthUniform, diffuseStrength);
-
-    for (auto& obj : objects)
+    for (auto& object : objects)
     {
-        obj.LitRender(shader, modelUniform, viewUniform, projectionUniform,
-            objectColorUniform,specularStrengthUniform, view, projection);
+        glUniformMatrix4fv(modelUniform, 1, GL_FALSE, glm::value_ptr(object.model.getModelMatrix()));
+
+        if (objectColorUniform != -1)
+        {
+            glm::vec3 colour = object.model.getObjectColor();
+
+            glUniform3f(objectColorUniform, colour.x, colour.y, colour.z);
+            glUniform1f(specularStrengthUniform, object.model.getSpecularStrength());
+        }
+
+        if (object.texture && textureUniform != -1)
+        {
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, object.texture->getId());
+            glUniform1i(textureUniform, 0);
+        }
+
+        object.model.render();
     }
 }

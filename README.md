@@ -21,7 +21,7 @@
 
 <!-- ABOUT THE PROJECT -->
 ## About The Project
-This project was develouped as an university assignment for my Rendering Engine's cource. The goal of the project was to create a custom real-time 3D rendering engine in C++ using OpenGL. The engine features three distinct changable scenes, Phong lighting and an ImGui control panel for dynamically changing different variables withought recompiling. 
+This project was developed as a university assignment for my Rendering Engine's course. The goal of the project was to create a custom real-time 3D rendering engine in C++ using OpenGL. The engine features three distinct changeable scenes, Phong lighting and an ImGui control panel for dynamically changing different variables without recompiling.
 
 <img width="2108" height="1332" alt="Scene 0" src="https://github.com/user-attachments/assets/55caf4db-2873-4e72-89ef-69aefd093e2e" />
 <img width="2548" height="1319" alt="Grayscale" src="https://github.com/user-attachments/assets/ef1512c5-b313-470e-a7c9-89cfc30e8716" />
@@ -50,7 +50,8 @@ This project was develouped as an university assignment for my Rendering Engine'
 
 <!-- USAGE EXAMPLES -->
 ## Usage
-Once running, a control panel appears in the top left corner of the window. Use it to switch between different scenes adn to change different settings.
+Once running, a control panel appears in the top left corner of the window. Use it to switch between different scenes and to change different settings.
+
 **Controls:**
 * W / A / S / D - Forward / Left / Backwards / Right movement
 * Space - Upwards movement
